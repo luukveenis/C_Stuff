@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct DataNode
 {
@@ -80,6 +81,21 @@ void delete_node(node* node)
 	}
 }
 
+/* Searches for and returns a node that constains the specified string */
+node* search(char *data)
+{
+	node* current = head;
+	while (NULL != current)
+	{
+		if (0 == strcmp(data, current->data->info))
+		{
+			return current;
+		}
+		current = current->next;
+	}
+	return current;
+}
+
 /* Inserts a node that contains the given information
  * at the head of the list */
 void insert_at_head(char* new_data)
@@ -126,4 +142,7 @@ int main(void)
 	printf("\nDeleting another node...\n");
 	delete_node(head);
 	print_list();
+	printf("\nSearching for 'Luuk'\n");
+	node* result = search("Luuk");
+	printf("Result was: %s\n", result->data->info);
 }
