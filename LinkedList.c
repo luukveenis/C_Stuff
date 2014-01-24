@@ -113,6 +113,51 @@ void insert_at_head(char* new_data)
 	}
 }
 
+/* Inserts a new node after the provided node */
+node* insert_after(node *node, char *data)
+{
+	/* Case 1: Inserting in middle of list */
+	if (NULL != node && NULL != node->next)
+	{
+		node *new_node = create_node(data);
+		new_node->prev = node;
+		new_node->next = node->next;
+		new_node->next->prev = new_node;
+		new_node->prev->next = new_node;
+	}
+	/* Case 2: Inserting at the end of the list */
+	else if (NULL != node && NULL == node->next)
+	{
+		node *new_node = create_node(data);
+		new_node->prev = node;
+		node->next = new_node;
+	}
+	else
+	{
+		printf("Invalid node: is NULL");
+		return NULL;
+	}
+	/* You should never be inserting at the beginning using this function */
+	return new_node;
+}
+
+/* Returns the node at the given index (indexing from 0)
+ * Returns NULL if the index doesn't exist */
+node* find_node_at(node *head, int index)
+{
+	node *current = head;
+	int count = 0;
+	while (NULL != current)
+	{
+		if (count == index)
+		{
+			return current;
+		}
+		count++;
+	}
+	return NULL;	
+}
+
 /* Simply prints all the elements currently in the list pointed to by head */
 void print_list()
 {
@@ -124,6 +169,19 @@ void print_list()
 		counter++;
 		current = current->next;
 	}
+}
+
+/* Returns the size of the list */
+int size(node* head)
+{
+	int count= 0;
+	node* current = head;
+	while (NULL != current)
+	{
+		count++;
+		current = current->next;
+	}
+	return count;
 }
 
 /* Just some testing code */
@@ -145,4 +203,5 @@ int main(void)
 	printf("\nSearching for 'Luuk'\n");
 	node* result = search("Luuk");
 	printf("Result was: %s\n", result->data->info);
+	printf("Size is: %d\n", size(head));
 }
