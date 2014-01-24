@@ -2,34 +2,44 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct DataNode* d_node_ptr;
 typedef struct DataNode
 {
 	char* info;
 } d_node;
 
+typedef struct Node* node_ptr;
 typedef struct Node
 {
-	struct Node* next;
-	struct Node* prev;
-	d_node* data;
+	node_ptr next;
+	node_ptr prev;
+	d_node_ptr data;
 } node;
+
+typedef struct LinkedList* llist_ref;
+typedef struct LinkedList
+{
+	node_ptr head;
+	node_ptr tail;
+	int size;
+} LList;
 
 /* Global references to head and tail to
  * avoid having to pass them around in functions */
-node* head = NULL;
-node* tail = NULL;
+node_ptr head = NULL;
+node_ptr tail = NULL;
 
 /* Creates a new node
  * Both back and prev pointers will be NULL
  * Creates a data node with the specified data and sets the reference */
-node* create_node(char* new_data)
+node_ptr create_node(char* new_data)
 {
 	/* Create the node */
-	node* new_node = malloc(sizeof(node));
+	node_ptr new_node = malloc(sizeof(node));
 	new_node->next = NULL;
 	new_node->prev = NULL;
 	/* Create the data struct */
-	d_node* data_node = malloc(sizeof(d_node));
+	d_node_ptr data_node = malloc(sizeof(d_node));
 	data_node->info = new_data;
 	/* Set the reference */
 	new_node->data = data_node;
@@ -38,7 +48,7 @@ node* create_node(char* new_data)
 
 /* Destroys the given node, freeing the memory 
  * All pointers are set to NULL */
-void deallocate_node(node* node)
+void deallocate_node(node_ptr node)
 {
 	node->data->info = NULL;
 	free(node->data);
@@ -49,26 +59,26 @@ void deallocate_node(node* node)
 }
 
 /* Deletes the given node */
-void delete_node(node* node)
+void delete_node(llist_ref list, node_ptr node)
 {
 	/* Case 1: It is the only node in the list */
 	if (NULL == node->prev && NULL == node->next)
 	{
-		head = NULL;
-		tail = NULL;
+		list->head = NULL;
+		list->tail = NULL;
 		deallocate_node(node);
 	}
 	/* Case 2: It is the head of the list */
 	else if (NULL == node->prev && NULL != node->next)
 	{
-		head = node->next;
+		list->head = node->next;
 		node->next->prev = NULL;
 		deallocate_node(node);
 	}
 	/* Case 3: It is the tail of the list */
 	else if (NULL != node->prev && NULL == node->next)
 	{
-		tail = node->prev;
+		list->tail = node->prev;
 		node->prev->next = NULL;
 		deallocate_node(node);
 	}
@@ -79,12 +89,13 @@ void delete_node(node* node)
 		node->next->prev = node->prev;
 		deallocate_node(node);
 	}
+	list->size--;
 }
 
 /* Searches for and returns a node that constains the specified string */
-node* search(char *data)
+node_ptr search(llist_ref list, char *data)
 {
-	node* current = head;
+	node_ptr current = list->head;
 	while (NULL != current)
 	{
 		if (0 == strcmp(data, current->data->info))
@@ -98,54 +109,61 @@ node* search(char *data)
 
 /* Inserts a node that contains the given information
  * at the head of the list */
-void insert_at_head(char* new_data)
+void insert_at_head(llist_ref list, char* new_data)
 {
-	node* new_node = create_node(new_data);
-	if (NULL == head)
+	node_ptr new_node = create_node(new_data);
+	if (NULL == list->head)
 	{
-		head = new_node;
+		list->head = new_node;
+		if (NULL == list->tail)
+		{
+			list->tail = new_node;
+		}
 	}
 	else
 	{
-		head->prev = new_node;
+		list->head->prev = new_node;
 		new_node->next = head;
-		head = new_node;
+		list->head = new_node;
 	}
+	list->size++;
 }
 
 /* Inserts a new node after the provided node */
-node* insert_after(node *node, char *data)
+node_ptr insert_after(llist_ref list, node *node, char *data)
 {
 	/* Case 1: Inserting in middle of list */
 	if (NULL != node && NULL != node->next)
 	{
-		node *new_node = create_node(data);
+		node_ptr new_node = create_node(data);
 		new_node->prev = node;
 		new_node->next = node->next;
 		new_node->next->prev = new_node;
 		new_node->prev->next = new_node;
+		list->size++;
+		return new_node;
 	}
 	/* Case 2: Inserting at the end of the list */
 	else if (NULL != node && NULL == node->next)
 	{
-		node *new_node = create_node(data);
+		node_ptr new_node = create_node(data);
 		new_node->prev = node;
 		node->next = new_node;
+		list->size++;
+		return new_node;
 	}
 	else
 	{
 		printf("Invalid node: is NULL");
 		return NULL;
 	}
-	/* You should never be inserting at the beginning using this function */
-	return new_node;
 }
 
 /* Returns the node at the given index (indexing from 0)
  * Returns NULL if the index doesn't exist */
-node* find_node_at(node *head, int index)
+node_ptr find_node_at(llist_ref list, node *head, int index)
 {
-	node *current = head;
+	node *current = list->head;
 	int count = 0;
 	while (NULL != current)
 	{
@@ -159,10 +177,10 @@ node* find_node_at(node *head, int index)
 }
 
 /* Simply prints all the elements currently in the list pointed to by head */
-void print_list()
+void print_list(llist_ref list)
 {
 	int counter = 1;
-	node* current = head;
+	node_ptr current = list->head;
 	while(NULL != current)
 	{
 		printf("Node %d: %s\n", counter, current->data->info);
@@ -172,10 +190,10 @@ void print_list()
 }
 
 /* Returns the size of the list */
-int size(node* head)
+int size(llist_ref list)
 {
 	int count= 0;
-	node* current = head;
+	node_ptr current = list->head;
 	while (NULL != current)
 	{
 		count++;
@@ -187,21 +205,26 @@ int size(node* head)
 /* Just some testing code */
 int main(void)
 {
+	LList list;
+	list.head = NULL;
+	list.tail = NULL;
+	list.size = 0;
+
 	printf("Hello, and welcome to my linked list program!\n\n");
 	printf("Inserting some data...\n");
-	insert_at_head("Luuk");
-	insert_at_head("Ozzy");
-	insert_at_head("Andria");
-	insert_at_head("Linux");
-	print_list();
+	insert_at_head(&list, "Luuk");
+	insert_at_head(&list, "Ozzy");
+	insert_at_head(&list, "Andria");
+	insert_at_head(&list, "Linux");
+	print_list(&list);
 	printf("\nDeleting the first node...\n");
-	delete_node(head);
-	print_list();
+	delete_node(&list, head);
+	print_list(&list);
 	printf("\nDeleting another node...\n");
-	delete_node(head);
-	print_list();
+	delete_node(&list, head);
+	print_list(&list);
 	printf("\nSearching for 'Luuk'\n");
-	node* result = search("Luuk");
+	node_ptr result = search(&list, "Luuk");
 	printf("Result was: %s\n", result->data->info);
-	printf("Size is: %d\n", size(head));
+	printf("Size is: %d\n", size(&list));
 }

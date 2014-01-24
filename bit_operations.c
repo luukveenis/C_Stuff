@@ -3,8 +3,9 @@
 #include <math.h>
 
 /* Gets the bit representation of an unsigned char (byte) as a string
- * Inputs: byte - the character to get the representation for (generally 1 byte)
- *				 bit_length - the bit length of a character (machine dependent)
+ * Inputs:
+ * byte - the character to get the representation for (generally 1 byte)
+ * bit_length - the bit length of a character (machine dependent)
  */
 char* byte_get_bits(unsigned char byte, int bit_length)
 {
@@ -26,8 +27,9 @@ char* byte_get_bits(unsigned char byte, int bit_length)
 }
 
 /* Gets the bit representation of an integer as a string 
- * Inputs: input - the integer to get the bits for
- *				 int_length - the bit length of an integer (machine dependent) */
+ * Inputs: 
+ * input - the integer to get the bits for
+ * int_length - the bit length of an integer (machine dependent) */
 char* int_get_bits(int input, int int_length)
 {
 	/* Initialize the array */
