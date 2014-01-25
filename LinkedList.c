@@ -123,7 +123,7 @@ void insert_at_head(llist_ref list, char* new_data)
 	else
 	{
 		list->head->prev = new_node;
-		new_node->next = head;
+		new_node->next = list->head;
 		list->head = new_node;
 	}
 	list->size++;
@@ -205,12 +205,11 @@ int size(llist_ref list)
 /* Just some testing code */
 int main(void)
 {
-	LList list;
-	list.head = NULL;
-	list.tail = NULL;
-	list.size = 0;
+	LList list = {NULL, NULL, 0};
 
-	printf("Hello, and welcome to my linked list program!\n\n");
+	printf("******************************\n");
+	printf("* Simple linked list program *\n");
+	printf("******************************\n\n");
 	printf("Inserting some data...\n");
 	insert_at_head(&list, "Luuk");
 	insert_at_head(&list, "Ozzy");
@@ -218,13 +217,17 @@ int main(void)
 	insert_at_head(&list, "Linux");
 	print_list(&list);
 	printf("\nDeleting the first node...\n");
-	delete_node(&list, head);
+	delete_node(&list, list.head);
 	print_list(&list);
 	printf("\nDeleting another node...\n");
-	delete_node(&list, head);
+	delete_node(&list, list.head);
 	print_list(&list);
 	printf("\nSearching for 'Luuk'\n");
 	node_ptr result = search(&list, "Luuk");
 	printf("Result was: %s\n", result->data->info);
-	printf("Size is: %d\n", size(&list));
+	printf("Size is: %d\n\n", list.size);
+	printf("Inserting two things after Luuk...\n");
+	insert_after(&list, search(&list, "Luuk"), "New stuff");
+	insert_after(&list, search(&list, "Luuk"), "More stuff");
+	print_list(&list);
 }
